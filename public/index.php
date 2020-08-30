@@ -25,7 +25,10 @@ $app->get('/', function ($request, $response) {
 
 $app->get('/users/{id}', function ($request, $response, $args) {
     headers($request);
-    $params = ['id' => $args['id'], 'nickname' => 'user-' . $args['id']];
+    $params = [
+        'id' => htmlspecialchars($args['id']),
+        'nickname' => htmlspecialchars('user-' . $args['id'])
+    ];
     // Указанный путь считается относительно базовой директории для шаблонов, заданной на этапе конфигурации
     // $this доступен внутри анонимной функции благодаря https://php.net/manual/ru/closure.bindto.php
     // $this в Slim это контейнер зависимостей
@@ -38,7 +41,7 @@ $app->post('/users', function ($request, $response) {
 });
 
 $app->get('/courses/{id}', function ($request, $response, array $args) {
-    $id = $args['id'];
+    $id = htmlspecialchars($args['id']);
     headers($request);
     return $response->write("Course id: {$id}");
 });
