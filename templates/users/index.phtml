@@ -1,12 +1,12 @@
-<table>
-    <?php foreach ($users as $user):?>
-        <tr>
-            <td>
-                <?= $user ?>
-            </td>
-        </tr>
+<a href="/users/new">Новый пользователь</a>
+
+<div>
+    <?php foreach ($users as ['nickname' => $nickname, 'email' => $email, 'id' => $id]): ?>
+        <div>
+                <?= "Name - {$nickname}, Email - {$email}" ?>
+        </div>
     <?php endforeach ?>
-</table>
+</div>
 <form action="/users" method="get">
     <input type="search" required name="term">
 </form>

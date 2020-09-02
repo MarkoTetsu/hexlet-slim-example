@@ -18,39 +18,44 @@ $app->addErrorMiddleware(true, true, true);
 $users = ['mike', 'mishel', 'adel', 'keks', 'kamila'];
 
 $app->get('/', function ($request, $response) {
-    $response->getBody()->write('Welcome to Slim!');
-    headers($request);
-    return $response;
-    // Благодаря пакету slim/http этот же код можно записать короче
-    // return $response->write('Welcome to Slim!');
+    return $this->get('renderer')->render($response, 'index.phtml');
 });
 
-$app->get('/users/{id}', function ($request, $response, $args) {
-    headers($request);
+$app->get('/users/new', function ($request, $response) {
     $params = [
-        'id' => htmlspecialchars($args['id']),
-        'nickname' => htmlspecialchars('user-' . $args['id'])
+        'user' => ['nickname' => '', 'email' => '', 'id' => ''],
+        'errors' => []
     ];
-    // Указанный путь считается относительно базовой директории для шаблонов, заданной на этапе конфигурации
-    // $this доступен внутри анонимной функции благодаря https://php.net/manual/ru/closure.bindto.php
-    // $this в Slim это контейнер зависимостей
-    return $this->get('renderer')->render($response, 'users/show.phtml', $params);
+
+    return $this->get('renderer')->render($response, 'users/new.phtml', $params);
+});
+
+//$repo = new App\UserRepository();
+
+$app->post('/users', function ($request, $response) {
+    $user = $request->getParsedBodyParam('user');
+    $errors = validate($user);
+    if (count($errors) === 0) {
+        saveInFile($user);
+        return $response->withRedirect('/users', 302);
+    }
+    $params = [
+        'user' => $user,
+        'errors' => $errors
+    ];
+    return $this->get('renderer')->render($response, "users/new.phtml", $params);
 });
 
 $app->get('/users', function ($request, $response) use ($users) {
+    $users = readFromFile('users');
     $term = $request->getQueryParam('term');
     if ($term !== null) {
-        $filteredUsers = array_filter($users, fn($user) => strpos($user, $term) !== false);
+        $filteredUsers = array_filter($users, fn($user) => stripos($user['nickname'], $term) !== false);
     } else {
         $filteredUsers = $users;
     }
     $params = ['users' => $filteredUsers];
     return $this->get('renderer')->render($response, 'users/index.phtml', $params);
-});
-
-$app->post('/users', function ($request, $response) {
-    headers($request);
-    return $response->withStatus(302);
 });
 
 $app->get('/courses/{id}', function ($request, $response, array $args) {
@@ -59,7 +64,8 @@ $app->get('/courses/{id}', function ($request, $response, array $args) {
     return $response->write("Course id: {$id}");
 });
 
-function headers($request) {
+function headers($request)
+{
     $headers = $request->getHeaders();
     $uri = $request->getUri();
     $method = $request->getMethod();
@@ -67,6 +73,38 @@ function headers($request) {
     foreach ($headers as $name => $values) {
         echo "<p>" . $name . ": " . implode(", ", $values) . "</p>";
     }
+}
+
+function validate($user)
+{
+    $errors = [];
+    if (empty($user['nickname'])) {
+        $errors['nickname'] = "Can't be blank";
+    }
+    if (empty($user['email'])) {
+        $errors['email'] = "Can't be blank";
+    }
+    if (empty($user['id'])) {
+        $errors['id'] = "Can't be blank";
+    }
+    return $errors;
+}
+
+function saveInFile($user): void
+{
+    file_put_contents('users', json_encode($user) . '/', FILE_APPEND);
+}
+
+function readFromFile($path)
+{
+    $users = [];
+    $fileData = explode('/', file_get_contents($path));
+    foreach ($fileData as $value) {
+        if ($value !== '') {
+            $users[] = json_decode($value, JSON_OBJECT_AS_ARRAY);
+        }
+    }
+    return $users;
 }
 
 $app->run();
