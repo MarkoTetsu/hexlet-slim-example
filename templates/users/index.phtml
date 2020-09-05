@@ -1,12 +1,17 @@
-<a href="/users/new">Новый пользователь</a>
-
-<div>
-    <?php foreach ($users as ['nickname' => $nickname, 'email' => $email, 'id' => $id]): ?>
-        <div>
-                <?= "Name - {$nickname}, Email - {$email}" ?>
-        </div>
-    <?php endforeach ?>
-</div>
-<form action="/users" method="get">
-    <input type="search" required name="term">
-</form>
+<p>
+    <a href="/users/new">Новый пользователь</a>
+</p>
+<p>
+    <form action="/users" method="get">
+        <input type="search" required name="term">
+    </form>
+</p>
+<p>
+    <div>
+        <?php foreach ($users as ['nickname' => $nickname, 'id' => $id]): ?>
+            <div>
+                    <?php echo "<a href='/user/{$id}'>{$nickname}</a>" ?>
+            </div>
+        <?php endforeach ?>
+    </div>
+</p>

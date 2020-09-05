@@ -15,22 +15,13 @@ $container->set('renderer', function () {
 $app = AppFactory::createFromContainer($container);
 $app->addErrorMiddleware(true, true, true);
 
-$users = ['mike', 'mishel', 'adel', 'keks', 'kamila'];
-
-$app->get('/', function ($request, $response) {
-    return $this->get('renderer')->render($response, 'index.phtml');
-});
-
 $app->get('/users/new', function ($request, $response) {
     $params = [
         'user' => ['nickname' => '', 'email' => '', 'id' => ''],
         'errors' => []
     ];
-
     return $this->get('renderer')->render($response, 'users/new.phtml', $params);
-});
-
-//$repo = new App\UserRepository();
+})->setName('newUser');
 
 $app->post('/users', function ($request, $response) {
     $user = $request->getParsedBodyParam('user');
@@ -46,7 +37,7 @@ $app->post('/users', function ($request, $response) {
     return $this->get('renderer')->render($response, "users/new.phtml", $params);
 });
 
-$app->get('/users', function ($request, $response) use ($users) {
+$app->get('/users', function ($request, $response) {
     $users = readFromFile('users');
     $term = $request->getQueryParam('term');
     if ($term !== null) {
@@ -56,12 +47,28 @@ $app->get('/users', function ($request, $response) use ($users) {
     }
     $params = ['users' => $filteredUsers];
     return $this->get('renderer')->render($response, 'users/index.phtml', $params);
+})->setName('users');
+
+$app->get('/user/{id}', function ($request, $response, $args) {
+    $id = htmlspecialchars($args['id']);
+    $users = readFromFile('users');
+    $filteredUser = array_values(array_filter($users, fn($user) => stripos($user['id'], $id) !== false));
+    if (empty($filteredUser)) {
+        return $response->write('User not found')->withStatus(204);
+    }
+    [$user] = $filteredUser;
+    $params = ['user' => $user];
+    return $this->get('renderer')->render($response, 'users/user.phtml', $params);
 });
 
-$app->get('/courses/{id}', function ($request, $response, array $args) {
-    $id = htmlspecialchars($args['id']);
-    headers($request);
-    return $response->write("Course id: {$id}");
+$router = $app->getRouteCollector()->getRouteParser();
+
+$app->get('/', function ($request, $response) use ($router) {
+    
+    $router->urlFor('users');
+    var_dump($router->urlFor('users'));
+    $router->urlFor('newUser');
+    return $this->get('renderer')->render($response, 'index.phtml');
 });
 
 function headers($request)

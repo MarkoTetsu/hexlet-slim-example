@@ -1,0 +1,15 @@
+<p>
+    <a href="/users">Пользователи</a>
+</p>
+<p>
+    <?php  ['nickname' => $nickname, 'email' => $email, 'id' => $id] = $user ?>
+    <div>
+        <?= "ID - {$id}" ?>
+    </div>
+    <div>
+        <?= "Name - {$nickname}" ?>
+    </div>
+    <div>
+        <?= "email - {$email}" ?>
+    </div>
+</p>
