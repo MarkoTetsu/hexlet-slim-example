@@ -2,12 +2,12 @@
     <a href="/users">Пользователи</a>
 </p>
 <p>
-    <?php  ['nickname' => $nickname, 'email' => $email, 'id' => $id] = $user ?>
+    <?php  ['name' => $name, 'email' => $email, 'id' => $id] = $user ?>
     <div>
         <?= "ID - {$id}" ?>
     </div>
     <div>
-        <?= "Name - {$nickname}" ?>
+        <?= "Name - {$name}" ?>
     </div>
     <div>
         <?= "email - {$email}" ?>

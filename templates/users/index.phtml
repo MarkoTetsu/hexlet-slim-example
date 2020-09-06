@@ -8,9 +8,9 @@
 </p>
 <p>
     <div>
-        <?php foreach ($users as ['nickname' => $nickname, 'id' => $id]): ?>
+        <?php foreach ($users as ['name' => $name, 'id' => $id]): ?>
             <div>
-                    <?php echo "<a href='/user/{$id}'>{$nickname}</a>" ?>
+                    <?php echo "<a href='/users/{$id}'>{$name}</a>" ?>
             </div>
         <?php endforeach ?>
     </div>

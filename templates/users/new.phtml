@@ -5,10 +5,10 @@
         <div>
             <label>
                 Имя
-                <input type="text" name="user[nickname]" value="<?= htmlspecialchars($user['nickname']) ?>">
+                <input type="text" name="user[name]" value="<?= htmlspecialchars($user['name']) ?>">
             </label>
-            <?php if (isset($errors['nickname'])): ?>
-                <div><?= $errors['nickname'] ?></div>
+            <?php if (isset($errors['name'])): ?>
+                <div><?= $errors['name'] ?></div>
             <?php endif ?>
         </div>
     </p>

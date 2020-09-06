@@ -17,7 +17,7 @@ $app->addErrorMiddleware(true, true, true);
 
 $app->get('/users/new', function ($request, $response) {
     $params = [
-        'user' => ['nickname' => '', 'email' => '', 'id' => ''],
+        'user' => ['name' => '', 'email' => '', 'id' => ''],
         'errors' => []
     ];
     return $this->get('renderer')->render($response, 'users/new.phtml', $params);
@@ -41,7 +41,7 @@ $app->get('/users', function ($request, $response) {
     $users = readFromFile('users');
     $term = $request->getQueryParam('term');
     if ($term !== null) {
-        $filteredUsers = array_filter($users, fn($user) => stripos($user['nickname'], $term) !== false);
+        $filteredUsers = array_filter($users, fn($user) => stripos($user['name'], $term) !== false);
     } else {
         $filteredUsers = $users;
     }
@@ -49,12 +49,12 @@ $app->get('/users', function ($request, $response) {
     return $this->get('renderer')->render($response, 'users/index.phtml', $params);
 })->setName('users');
 
-$app->get('/user/{id}', function ($request, $response, $args) {
+$app->get('/users/{id}', function ($request, $response, $args) {
     $id = htmlspecialchars($args['id']);
     $users = readFromFile('users');
     $filteredUser = array_values(array_filter($users, fn($user) => stripos($user['id'], $id) !== false));
     if (empty($filteredUser)) {
-        return $response->write('User not found')->withStatus(204);
+        return $response->write('Page not found')->withStatus(404);
     }
     [$user] = $filteredUser;
     $params = ['user' => $user];
@@ -64,29 +64,16 @@ $app->get('/user/{id}', function ($request, $response, $args) {
 $router = $app->getRouteCollector()->getRouteParser();
 
 $app->get('/', function ($request, $response) use ($router) {
-    
     $router->urlFor('users');
-    var_dump($router->urlFor('users'));
     $router->urlFor('newUser');
     return $this->get('renderer')->render($response, 'index.phtml');
 });
 
-function headers($request)
-{
-    $headers = $request->getHeaders();
-    $uri = $request->getUri();
-    $method = $request->getMethod();
-    echo "<p>{$method} {$uri}</p>"; 
-    foreach ($headers as $name => $values) {
-        echo "<p>" . $name . ": " . implode(", ", $values) . "</p>";
-    }
-}
-
 function validate($user)
 {
     $errors = [];
-    if (empty($user['nickname'])) {
-        $errors['nickname'] = "Can't be blank";
+    if (empty($user['name'])) {
+        $errors['name'] = "Can't be blank";
     }
     if (empty($user['email'])) {
         $errors['email'] = "Can't be blank";
@@ -111,6 +98,7 @@ function readFromFile($path)
             $users[] = json_decode($value, JSON_OBJECT_AS_ARRAY);
         }
     }
+    uasort($users, fn($a, $b) => strcmp($a['name'], $b['name']));
     return $users;
 }
 
