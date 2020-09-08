@@ -4,12 +4,12 @@
 <p>
     <?php  ['name' => $name, 'email' => $email, 'id' => $id] = $user ?>
     <div>
-        <?= "ID - {$id}" ?>
+        <?= "ID - " . htmlspecialchars($id)?>
     </div>
     <div>
-        <?= "Name - {$name}" ?>
+        <?= "Name - " . htmlspecialchars($name) ?>
     </div>
     <div>
-        <?= "email - {$email}" ?>
+        <?= "email - " . htmlspecialchars($email) ?>
     </div>
 </p>

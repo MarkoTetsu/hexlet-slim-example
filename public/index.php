@@ -15,6 +15,8 @@ $container->set('renderer', function () {
 $app = AppFactory::createFromContainer($container);
 $app->addErrorMiddleware(true, true, true);
 
+$router = $app->getRouteCollector()->getRouteParser();
+
 $app->get('/users/new', function ($request, $response) {
     $params = [
         'user' => ['name' => '', 'email' => '', 'id' => ''],
@@ -22,20 +24,6 @@ $app->get('/users/new', function ($request, $response) {
     ];
     return $this->get('renderer')->render($response, 'users/new.phtml', $params);
 })->setName('newUser');
-
-$app->post('/users', function ($request, $response) {
-    $user = $request->getParsedBodyParam('user');
-    $errors = validate($user);
-    if (count($errors) === 0) {
-        saveInFile($user);
-        return $response->withRedirect('/users', 302);
-    }
-    $params = [
-        'user' => $user,
-        'errors' => $errors
-    ];
-    return $this->get('renderer')->render($response, "users/new.phtml", $params);
-});
 
 $app->get('/users', function ($request, $response) {
     $users = readFromFile('users');
@@ -49,6 +37,26 @@ $app->get('/users', function ($request, $response) {
     return $this->get('renderer')->render($response, 'users/index.phtml', $params);
 })->setName('users');
 
+$app->post('/users', function ($request, $response) use ($router) {
+    $user = $request->getParsedBodyParam('user');
+    $errors = validate($user);
+    $users = readFromFile('users');
+    $userIDExists = in_array($user['id'], array_column($users, 'id'));
+    if (count($errors) === 0 && !$userIDExists) {
+        saveInFile($user);
+        $url = $router->urlFor('users');
+        return $response->withRedirect($url, 302);
+    }
+    if ($userIDExists) {
+        $errors['idExists'] = 'User id already exists!';
+    }
+    $params = [
+        'user' => $user,
+        'errors' => $errors
+    ];
+    return $this->get('renderer')->render($response, "users/new.phtml", $params);
+});
+
 $app->get('/users/{id}', function ($request, $response, $args) {
     $id = htmlspecialchars($args['id']);
     $users = readFromFile('users');
@@ -61,11 +69,7 @@ $app->get('/users/{id}', function ($request, $response, $args) {
     return $this->get('renderer')->render($response, 'users/user.phtml', $params);
 });
 
-$router = $app->getRouteCollector()->getRouteParser();
-
 $app->get('/', function ($request, $response) use ($router) {
-    $router->urlFor('users');
-    $router->urlFor('newUser');
     return $this->get('renderer')->render($response, 'index.phtml');
 });
 
