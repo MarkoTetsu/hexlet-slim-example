@@ -1,3 +1,13 @@
+<?php if (count($flash) > 0): ?>
+  <ul>
+  <?php foreach ($flash as $messages): ?>
+      <?php foreach ($messages as $message): ?>
+          <li><?= $message ?></li>
+      <?php endforeach ?>
+  <?php endforeach ?>
+  </ul>
+<?php endif ?>
+
 <p>
     <a href="/users/new">Новый пользователь</a>
 </p>
@@ -8,10 +18,16 @@
 </p>
 <p>
     <div>
-        <?php foreach ($users as ['name' => $name, 'id' => $id]): ?>
-            <div>
-                    <?php echo "<a href='/users/{$id}'>{$name}</a>" ?>
-            </div>
+        <?php foreach ($users as ['id' => $id, 'name' => $name]): ?>
+            <form action="/users/<?= $id ?>" method="post">
+                <input type="hidden" name="_METHOD" value="DELETE">
+                <p>
+                    <div>
+                        <button> Remove </button>
+                        <?= "<a href='/users/{$id}'>" . htmlspecialchars($name) . "</a>" ?>
+                    </div>
+                </p>
+            </form>
         <?php endforeach ?>
     </div>
 </p>

@@ -4,7 +4,8 @@
         <div><?= $errors['idExists'] ?></div>
     <?php endif ?>
 </p>
-<form action="/users" method="post">
+<form action="/users/<?= $user['id'] ?>" method="post">
+    <input type="hidden" name="_METHOD" value="PATCH">
     <p>
         <div>
             <label>
@@ -31,12 +32,12 @@
         <div>
             <label>
                 Id
-                <input type="text" name="user[id]" value="<?= htmlspecialchars($user['id']) ?>" >
+                <input type="text" name="user[id]" value="<?= htmlspecialchars($user['id']) ?>" readonly >
             </label>
             <?php if (isset($errors['id'])): ?>
                 <div><?= $errors['id'] ?></div>
             <?php endif ?>
         </div>
     </p>
-    <input type="submit" value="Sign Up">
+    <input type="submit" value="Update">
 </form>
